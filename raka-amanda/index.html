@@ -9,7 +9,7 @@
 <style>
 body {
   margin:0;
-  background:#cfcfcf;
+  background: linear-gradient(to bottom, #e9e9e9, #cfcfcf);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -17,9 +17,6 @@ body {
 }
 
 #book {
-  width: 80vw;          /* responsive */
-  max-width: 550px;     /* batas maksimal */
-  aspect-ratio: 450 / 636; 
   margin-top:40px;
   box-shadow: 0 40px 80px rgba(0,0,0,0.3);
   border-radius: 12px;
@@ -43,7 +40,7 @@ canvas {
 
 <body>
 
-<h2>Raka & Amanda</h2>
+<h2>New Raka & Amanda</h2>
 
 <div id="book"></div>
 
@@ -55,10 +52,10 @@ canvas {
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 450,
-    height: 636,
-    size: "stretch",      // GANTI fixed → stretch
-    autoSize: true,       // WAJIB
+    width: 380,          // kecilkan dari 450
+    height: 537,         // 380 x (636/450)
+    size: "fixed",       // kembali ke fixed
+    autoSize: false,
     showCover: true,
     maxShadowOpacity: 0.15,
     drawShadow: false,
