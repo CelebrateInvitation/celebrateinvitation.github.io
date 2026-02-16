@@ -31,6 +31,10 @@ img {
   height:auto;
   display:block;
 }
+
+canvas {
+  image-rendering: auto;
+}
 </style>
 </head>
 
@@ -50,16 +54,17 @@ const pageFlip = new St.PageFlip(
   {
     width: 450,
     height: 636,
-    size: "fixed",
+    size: "stretch",      // GANTI fixed → stretch
+    autoSize: true,       // WAJIB
     showCover: true,
-    maxShadowOpacity: 0.15, // lebih ringan
-    drawShadow: false,      // MATIKAN shadow berat
-    flippingTime: 600,      // animasi lebih cepat & halus
+    maxShadowOpacity: 0.15,
+    drawShadow: false,
+    flippingTime: 600,
     usePortrait: true,
     mobileScrollSupport: false
   }
 );
-
+  
 pageFlip.loadFromImages([
   "1.jpg",
   "2.jpg",
