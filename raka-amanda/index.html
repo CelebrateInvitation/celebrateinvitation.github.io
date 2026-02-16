@@ -40,7 +40,7 @@ canvas {
 
 <body>
 
-<h2>New Raka & Amanda</h2>
+<h2>Raka & Amanda</h2>
 
 <div id="book"></div>
 
@@ -52,15 +52,15 @@ canvas {
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 380,          // kecilkan dari 450
-    height: 537,         // 380 x (636/450)
-    size: "fixed",       // kembali ke fixed
+    width: 500,
+    height: 707,   // 500 x (636/450)
+    size: "fixed",
     autoSize: false,
     showCover: true,
-    maxShadowOpacity: 0.25,
-    drawShadow: false,
-    flippingTime: 700,
-    usePortrait: true,
+    maxShadowOpacity: 0.3,
+    drawShadow: true,
+    flippingTime: 800,
+    usePortrait: false,   // WAJIB agar jadi 2 halaman
     mobileScrollSupport: false
   }
 );
