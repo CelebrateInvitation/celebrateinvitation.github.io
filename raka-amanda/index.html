@@ -24,13 +24,18 @@ body {
   border-radius: 12px;
 }
 .page {
-  background:white;
+  background: white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
+
 img {
   width:100%;
   height:auto;
   display:block;
-  image-rendering:auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 </style>
 </head>
