@@ -21,12 +21,26 @@ body {
   box-shadow: 0 40px 80px rgba(0,0,0,0.3);
   border-radius: 12px;
 }
+
+.page {
+  background:white;
+}
+
+img {
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+canvas {
+  image-rendering: auto;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Raka & Amanda</h2>
+<h2>Fix Raka & Amanda</h2>
 
 <div id="book"></div>
 
@@ -35,16 +49,20 @@ body {
 </audio>
 
 <script>
+const scale = window.devicePixelRatio || 1;
 
-/* ================================
-   DEVICE PIXEL RATIO FIX
-================================ */
+const pageWidth = 500;
+const pageHeight = 707;
+
+// render 2x lebih besar
+const renderWidth = pageWidth * 2;
+const renderHeight = pageHeight * 2;
 
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 700,
-    height: 990,
+    width: renderWidth,
+    height: renderHeight,
     size: "fixed",
     autoSize: false,
     showCover: true,
@@ -67,6 +85,9 @@ pageFlip.loadFromImages([
   "8.png"
 ]);
 
+// kecilkan tampilan visual ke ukuran normal
+document.getElementById("book").style.transform = "scale(0.5)";
+document.getElementById("book").style.transformOrigin = "top center";
 </script>
 
 </body>
