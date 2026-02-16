@@ -72,6 +72,8 @@ h2{
   border-radius:14px;
   transform-origin: top center;
   transition:transform 0.3s ease;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Garis tengah buku */
@@ -103,7 +105,7 @@ canvas{
   <div id="book"></div>
 </div>
 
-<audio id="bg-music" loop>
+<audio id="bg-music" loop preload="auto" playsinline>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
@@ -138,8 +140,8 @@ const pageFlip = new St.PageFlip(
 function scaleBook() {
   const screenWidth = window.innerWidth;
   const fullWidth = pageWidth * 2;
-  const scale = Math.min(screenWidth / fullWidth, 1);
-
+  bookElement.style.transformOrigin = "top center";
+  
   bookElement.style.transform = `scale(${scale})`;
 }
 
@@ -151,14 +153,15 @@ const flipSound = document.getElementById("flipSound");
 const bgMusic = document.getElementById("bg-music");
 
 /* Unlock audio after first click */
+let musicStarted = false;
+
 document.addEventListener("click", function unlockAudio() {
 
-  bgMusic.play().catch(()=>{});
-
-  flipSound.play().then(() => {
-    flipSound.pause();
-    flipSound.currentTime = 0;
-  }).catch(()=>{});
+  if (!musicStarted) {
+    bgMusic.volume = 0.6;
+    bgMusic.play().catch(()=>{});
+    musicStarted = true;
+  }
 
   document.removeEventListener("click", unlockAudio);
 });
@@ -179,6 +182,8 @@ pageFlip.on("flip", function (e) {
   }
 });
 
+pdfjsLib.GlobalWorkerOptions.workerSrc ="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  
 /* ===== LOAD PDF SHARP RENDER ===== */
 pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
@@ -189,7 +194,8 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
     pages.push(
       pdf.getPage(num).then(page => {
 
-        const scale = 2;
+        const isMobile = window.innerWidth < 768;
+        const scale = isMobile ? 1.5 : 2;
         const viewport = page.getViewport({ scale });
 
         const canvas = document.createElement("canvas");
@@ -205,6 +211,9 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        
         return page.render({
           canvasContext: context,
           viewport: viewport
