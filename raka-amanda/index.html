@@ -80,11 +80,16 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         if (pages.length === pdf.numPages) {
 
           const pageFlip = new St.PageFlip(container, {
-            width: 450,
-            height: 600,
-            size: "stretch",
-            showCover: true,
-            mobileScrollSupport: false
+          width: 450,
+          height: 600,
+          size: "stretch",
+          showCover: true,
+          usePortrait: true,
+          startPage: 0,
+          maxShadowOpacity: 0.5,
+          mobileScrollSupport: false
+});
+
           });
 
           pageFlip.loadFromHTML(document.querySelectorAll(".page"));
