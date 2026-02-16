@@ -106,10 +106,30 @@ const pageFlip = new St.PageFlip(
 
 const flipSound = document.getElementById("flipSound");
 
-/* Play sound setiap halaman berpindah */
-pageFlip.on("flip", function () {
-  flipSound.currentTime = 0;
-  flipSound.play();
+document.addEventListener("click", function unlockAudio() {
+  flipSound.play().then(() => {
+    flipSound.pause();
+    flipSound.currentTime = 0;
+  }).catch(()=>{});
+  
+  document.removeEventListener("click", unlockAudio);
+});
+  
+let isFirstFlip = true;
+
+pageFlip.on("flip", function (e) {
+
+  // Skip event pertama (saat load awal)
+  if (isFirstFlip) {
+    isFirstFlip = false;
+    return;
+  }
+
+  // Hanya bunyi jika benar-benar pindah halaman
+  if (e.data > 0) {
+    flipSound.currentTime = 0;
+    flipSound.play().catch(() => {});
+  }
 });
   
 /* ===== LOAD PDF ===== */
