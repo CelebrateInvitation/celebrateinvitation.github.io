@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,49 +29,52 @@ body::before{
   position:fixed;
   top:50%;
   left:50%;
-  width:1200px;
-  height:1200px;
-  background:radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+  width:1100px;
+  height:1100px;
+  background:radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
   transform:translate(-50%,-50%);
   pointer-events:none;
   z-index:0;
 }
 
-/* Moving subtle light */
+/* Moving light */
 .light-effect{
   position:fixed;
   top:0;
-  left:-50%;
-  width:50%;
+  left:-60%;
+  width:60%;
   height:100%;
-  background:linear-gradient(
-    120deg,
-    transparent,
-    rgba(255,255,255,0.05),
-    transparent
-  );
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.05), transparent);
   transform:skewX(-20deg);
-  animation:lightMove 10s linear infinite;
+  animation:lightMove 9s linear infinite;
   pointer-events:none;
   z-index:1;
 }
-
 @keyframes lightMove{
-  0%{ left:-50%; }
-  100%{ left:150%; }
+  0%{ left:-60%; }
+  100%{ left:160%; }
+}
+
+.fade-in{
+  opacity:0;
+  transform:translateY(20px);
+  transition:all 1.2s ease;
+}
+.fade-in.show{
+  opacity:1;
+  transform:translateY(0);
 }
 
 h2{
-  margin-top:50px;
+  margin-top:45px;
   font-weight:300;
   letter-spacing:6px;
   font-size:28px;
-  text-transform:uppercase;
   z-index:2;
 }
 
 #guest-name{
-  margin-top:15px;
+  margin-top:14px;
   font-size:14px;
   letter-spacing:2px;
   color:#aaa;
@@ -87,46 +90,36 @@ h2{
 }
 
 #book-wrapper{
-  margin-top:60px;
-  perspective:2500px;
+  margin-top:55px;
+  perspective:2200px;
   z-index:2;
 }
 
 #book{
   position:relative;
   border-radius:14px;
-  transform-origin: top center;
+  background:#111;
 
   box-shadow:
-    0 60px 180px rgba(0,0,0,0.9),
-    0 20px 60px rgba(255,255,255,0.05),
-    inset 0 0 20px rgba(255,255,255,0.03);
+    0 60px 160px rgba(0,0,0,0.9),
+    0 20px 50px rgba(255,255,255,0.05);
 
-  background:#111;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
 }
 
-#book::after{
-  content:"";
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:50%;
-  width:4px;
-  transform:translateX(-50%);
-  background:linear-gradient(
-    to bottom,
-    transparent,
-    rgba(255,255,255,0.15),
-    rgba(0,0,0,0.6),
-    rgba(255,255,255,0.15),
-    transparent
-  );
-  pointer-events:none;
+/* 🔥 REAL CENTER DEPTH (BUKAN GARIS NEMPEL) */
+.page-flip .page{
+  box-shadow: inset -10px 0 18px rgba(0,0,0,0.35);
+}
+.page-flip .page.--left{
+  box-shadow: inset 10px 0 20px rgba(0,0,0,0.45);
 }
 
 canvas{
   border-radius:6px;
-  background:#000;
+  backface-visibility:hidden;
+  transform:translateZ(0);
 }
 </style>
 </head>
@@ -135,10 +128,10 @@ canvas{
 
 <div class="light-effect"></div>
 
-<h2>Raka & Amanda</h2>
-<div id="guest-name"></div>
+<h2 class="fade-in" id="title">Raka & Amanda</h2>
+<div id="guest-name" class="fade-in"></div>
 
-<div id="book-wrapper">
+<div id="book-wrapper" class="fade-in">
   <div id="book"></div>
 </div>
 
@@ -158,7 +151,7 @@ const isMobile = window.innerWidth < 768;
 
 const bookElement = document.getElementById("book");
 
-/* PAGE FLIP */
+/* ===== PAGE FLIP (REAL DRAG MODE) ===== */
 const pageFlip = new St.PageFlip(bookElement, {
   width: pageWidth,
   height: pageHeight,
@@ -166,100 +159,105 @@ const pageFlip = new St.PageFlip(bookElement, {
   autoSize: false,
   showCover: true,
   usePortrait: false,      // tetap 2 halaman di HP
-  flippingTime: 800,
-  maxShadowOpacity: 0.6,
+
+  flippingTime: 650,
+  maxShadowOpacity: 0.4,
   drawShadow: true,
+
   mobileScrollSupport: false,
   useMouseEvents: true,
-  swipeDistance: 15
+  swipeDistance: 8         // 🔥 FOLLOW FINGER
 });
 
-/* RESPONSIVE SCALE */
+/* ===== RESPONSIVE SCALE (GPU SAFE) ===== */
 function scaleBook(){
   const screenWidth = window.innerWidth;
-  const fullWidth = pageWidth * 2;
-  const scale = Math.min(screenWidth / fullWidth, 1);
+  const scale = Math.min(screenWidth / (pageWidth * 2), 1);
   bookElement.style.transform = `scale(${scale})`;
+  bookElement.style.willChange = "transform";
 }
 window.addEventListener("resize", scaleBook);
 
-/* AUDIO FIX (no auto flip sound) */
-const flipSound = document.getElementById("flipSound");
+/* ===== AUDIO CONTROL (NO AUTO FLIP SOUND) ===== */
 const bgMusic = document.getElementById("bg-music");
+const flipSound = document.getElementById("flipSound");
 
-let userHasInteracted = false;
+let audioUnlocked = false;
+let firstFlipSkipped = false;
 
-document.addEventListener("click", function unlock(){
-  if(!userHasInteracted){
-    bgMusic.volume = 0.6;
-    bgMusic.play().catch(()=>{});
-    userHasInteracted = true;
-  }
-  document.removeEventListener("click", unlock);
+document.addEventListener("click", () => {
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  bgMusic.volume = 0.6;
+  bgMusic.play().catch(()=>{});
 });
 
-pageFlip.on("flip", function(){
-  if(!userHasInteracted) return;
+pageFlip.on("flip", () => {
+  if(!firstFlipSkipped){
+    firstFlipSkipped = true;
+    return;
+  }
   flipSound.currentTime = 0;
   flipSound.play().catch(()=>{});
 });
 
-/* PDF FAST LOAD */
+/* ===== PDF FAST RENDER ===== */
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
+(async()=>{
+  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
-  const renderScale = isMobile ? 1 : 1.3;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.7);
+  const renderScale = isMobile ? 1.1 : 1.4;
 
-  async function renderPage(pageNumber){
-    const page = await pdf.getPage(pageNumber);
+  const pages = [];
+
+  // Render page pertama dulu (biar cepat muncul)
+  const firstPage = await pdf.getPage(1);
+  pages.push(await renderCanvas(firstPage));
+
+  pageFlip.loadFromHTML(pages);
+  scaleBook();
+  document.getElementById("book-wrapper").classList.add("show");
+
+  // Render sisanya di background
+  for(let i=2;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    pages.push(await renderCanvas(page));
+    pageFlip.loadFromHTML(pages);
+  }
+
+  async function renderCanvas(page){
     const viewport = page.getViewport({ scale: renderScale });
-
     const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
 
     canvas.width = viewport.width * dpr;
     canvas.height = viewport.height * dpr;
-
     canvas.style.width = pageWidth + "px";
     canvas.style.height = pageHeight + "px";
 
-    context.setTransform(dpr,0,0,dpr,0,0);
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = "high";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
-
+    await page.render({ canvasContext: ctx, viewport }).promise;
     return canvas;
   }
+})();
 
-  /* Render first page immediately */
-  const firstPage = await renderPage(1);
-  pageFlip.loadFromHTML([firstPage]);
-  scaleBook();
-
-  /* Render remaining pages progressively */
-  const pages = [firstPage];
-
-  for(let i=2;i<=pdf.numPages;i++){
-    const nextPage = await renderPage(i);
-    pages.push(nextPage);
-    pageFlip.updateFromHtml(pages);
-  }
-
-});
-
-/* GUEST SYSTEM */
-const params = new URLSearchParams(window.location.search);
-let guest = params.get("to") || "Tamu Undangan";
-guest = decodeURIComponent(guest.replace(/\+/g," "));
+/* ===== GUEST SYSTEM ===== */
+const params = new URLSearchParams(location.search);
+const guest = decodeURIComponent((params.get("to") || "Tamu Undangan").replace(/\+/g," "));
 document.getElementById("guest-name").innerHTML =
 `PREPARED EXCLUSIVELY FOR<br><strong>${guest}</strong>`;
+
+/* ===== FADE IN ===== */
+window.addEventListener("load",()=>{
+  setTimeout(()=>title.classList.add("show"),300);
+  setTimeout(()=>guestName.classList.add("show"),700);
+});
 </script>
 
 </body>
