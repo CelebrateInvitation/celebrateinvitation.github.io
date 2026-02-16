@@ -49,22 +49,31 @@ canvas {
 </audio>
 
 <script>
+const scale = window.devicePixelRatio || 1;
+
+const pageWidth = 500;
+const pageHeight = 707;
+
+// render 2x lebih besar
+const renderWidth = pageWidth * 2;
+const renderHeight = pageHeight * 2;
+
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 500,
-    height: 707,   // 500 x (636/450)
+    width: renderWidth,
+    height: renderHeight,
     size: "fixed",
     autoSize: false,
     showCover: true,
     maxShadowOpacity: 0.3,
     drawShadow: true,
     flippingTime: 800,
-    usePortrait: false,   // WAJIB agar jadi 2 halaman
+    usePortrait: false,
     mobileScrollSupport: false
   }
 );
-  
+
 pageFlip.loadFromImages([
   "1.png",
   "2.png",
@@ -75,6 +84,10 @@ pageFlip.loadFromImages([
   "7.png",
   "8.png"
 ]);
+
+// kecilkan tampilan visual ke ukuran normal
+document.getElementById("book").style.transform = "scale(0.5)";
+document.getElementById("book").style.transformOrigin = "top center";
 </script>
 
 </body>
