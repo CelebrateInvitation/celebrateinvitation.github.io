@@ -98,22 +98,45 @@ h2{
 
 #book-wrapper{
   margin-top:60px;
-  perspective:2000px;
+  perspective:2500px;
   z-index:2;
 }
 
 #book{
-  box-shadow:
-    0 40px 120px rgba(255,255,255,0.05),
-    0 0 40px rgba(255,255,255,0.08),
-    0 0 1px rgba(255,255,255,0.4);
+  position:relative;
   border-radius:14px;
   transform-origin: top center;
-  touch-action: none;
+
+  box-shadow:
+    0 60px 180px rgba(0,0,0,0.9),     /* shadow bawah dalam */
+    0 20px 60px rgba(255,255,255,0.05),
+    inset 0 0 20px rgba(255,255,255,0.03);
+
+  background:#111;
 }
 
+#book::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  width:4px;
+  transform:translateX(-50%);
+  background:linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255,255,255,0.15),
+    rgba(0,0,0,0.6),
+    rgba(255,255,255,0.15),
+    transparent
+  );
+  pointer-events:none;
+}
+  
 canvas{
   border-radius:6px;
+  background:#000;
 }
 </style>
 </head>
@@ -152,14 +175,15 @@ const pageFlip = new St.PageFlip(bookElement, {
   size: "fixed",
   autoSize: false,
   showCover: true,
-  usePortrait: false,
-  maxShadowOpacity: 0.4,
-  flippingTime: 900,
-  mobileScrollSupport: false,
+  usePortrait: false,       // tetap 2 halaman di HP
 
-  // 🔥 penting
-  useMouseEvents: !isMobile,
-  swipeDistance: 9999
+  flippingTime: 800,        // natural speed
+  maxShadowOpacity: 0.6,    // shadow lebih dalam
+  drawShadow: true,
+
+  mobileScrollSupport: false,
+  useMouseEvents: true,
+  swipeDistance: 15         // responsif tapi stabil
 });
 
 /* ===== SCALE RESPONSIVE ===== */
@@ -238,10 +262,19 @@ pageFlip.on("flip", function(e){
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
+pdfjsLib.getDocument({
+  url: pdfUrl,
+  disableAutoFetch: false,
+  disableStream: false
+}).promise.then(async pdf=>{
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const renderScale = isMobile ? 1.2 : 1.5;
+  const isMobile = window.innerWidth < 768;
+
+  // 🔥 DPR dibatasi supaya tidak berat
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.8);
+
+  // 🔥 Scale realistis tapi ringan
+  const renderScale = isMobile ? 1.1 : 1.4;
 
   const pages = [];
 
@@ -260,6 +293,7 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
     canvas.style.height = pageHeight + "px";
 
     context.setTransform(dpr,0,0,dpr,0,0);
+
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = "high";
 
@@ -273,7 +307,6 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
 
   pageFlip.loadFromHTML(pages);
   scaleBook();
-  document.getElementById("book-wrapper").classList.add("show");
 });
 
 /* ===== GUEST SYSTEM ===== */
