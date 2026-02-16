@@ -5,6 +5,7 @@
 <title>Raka & Amanda Wedding Invitation</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.js"></script>
 
 <style>
 body{
@@ -20,17 +21,14 @@ h2{
   margin-top:30px;
 }
 
-#viewer{
+#book{
   margin-top:40px;
   box-shadow:0 40px 80px rgba(0,0,0,0.3);
   border-radius:12px;
-  background:white;
-  padding:10px;
 }
 
-canvas{
-  display:block;
-  margin:20px auto;
+.page{
+  background:white;
 }
 </style>
 </head>
@@ -38,49 +36,43 @@ canvas{
 <body>
 
 <h2>Raka & Amanda</h2>
-
-<div id="viewer"></div>
+<div id="book"></div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-const url = 'magazinevol1.pdf';
+const pdfUrl = "wedding.pdf";
 
-pdfjsLib.getDocument(url).promise.then(pdf => {
-  const viewer = document.getElementById('viewer');
+const pageWidth = 500;
+const pageHeight = 707;
 
-  for(let pageNum = 1; pageNum <= pdf.numPages; pageNum++){
-    pdf.getPage(pageNum).then(page => {
-
-      const scale = 2; // retina sharp
-      const viewport = page.getViewport({ scale: scale });
-
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-
-      const dpr = window.devicePixelRatio || 1;
-
-      canvas.width = viewport.width * dpr;
-      canvas.height = viewport.height * dpr;
-      canvas.style.width = viewport.width + "px";
-      canvas.style.height = viewport.height + "px";
-
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport
-      };
-
-      page.render(renderContext);
-      viewer.appendChild(canvas);
-
-    });
+const pageFlip = new St.PageFlip(
+  document.getElementById("book"),
+  {
+    width: pageWidth,
+    height: pageHeight,
+    size: "fixed",
+    autoSize: false,
+    showCover: true,
+    usePortrait: false,
+    maxShadowOpacity: 0.3,
+    flippingTime: 800,
+    mobileScrollSupport: false
   }
-});
-</script>
+);
 
-</body>
-</html>
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+
+  const pages = [];
+
+  for (let num = 1; num <= pdf.numPages; num++) {
+
+    pages.push(
+      pdf.getPage(num).then(page => {
+
+        const scale = 2; // retina sharp
+        const viewport = page.getViewport({ scale: scale });
+
+        const canvas = document.c
