@@ -16,6 +16,13 @@ body {
   font-family:Arial;
 }
 
+#wrapper {
+  margin-top:40px;
+  transform: scale(0.5);
+  transform-origin: top center;
+  width: 1000px;   /* sama dengan renderWidth */
+}
+  
 #book {
   margin-top:40px;
   box-shadow: 0 40px 80px rgba(0,0,0,0.3);
@@ -35,14 +42,17 @@ img {
 canvas {
   image-rendering: auto;
 }
+
 </style>
 </head>
 
 <body>
 
-<h2>Fix Raka & Amanda</h2>
+<h2>Raka & Amanda</h2>
 
-<div id="book"></div>
+<div id="wrapper">
+  <div id="book"></div>
+</div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
