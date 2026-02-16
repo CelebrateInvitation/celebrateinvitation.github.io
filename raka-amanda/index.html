@@ -4,45 +4,34 @@
 <meta charset="UTF-8">
 <title>Raka & Amanda Wedding Invitation</title>
 
-<script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
-body {
+body{
   margin:0;
-  background: linear-gradient(to bottom, #e9e9e9, #cfcfcf);
+  background:linear-gradient(to bottom,#e9e9e9,#cfcfcf);
   display:flex;
   flex-direction:column;
   align-items:center;
   font-family:Arial;
 }
 
-#wrapper {
-  margin-top:40px;
-  transform: scale(0.5);
-  transform-origin: top center;
-  width: 1000px;   /* sama dengan renderWidth */
-}
-  
-#book {
-  margin-top:40px;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.3);
-  border-radius: 12px;
+h2{
+  margin-top:30px;
 }
 
-.page {
+#viewer{
+  margin-top:40px;
+  box-shadow:0 40px 80px rgba(0,0,0,0.3);
+  border-radius:12px;
   background:white;
+  padding:10px;
 }
 
-img {
-  width:100%;
-  height:auto;
+canvas{
   display:block;
+  margin:20px auto;
 }
-
-canvas {
-  image-rendering: auto;
-}
-
 </style>
 </head>
 
@@ -50,54 +39,47 @@ canvas {
 
 <h2>Raka & Amanda</h2>
 
-<div id="wrapper">
-  <div id="book"></div>
-</div>
+<div id="viewer"></div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-const scale = window.devicePixelRatio || 1;
+const url = 'magazinevol1.pdf';
 
-const pageWidth = 500;
-const pageHeight = 707;
+pdfjsLib.getDocument(url).promise.then(pdf => {
+  const viewer = document.getElementById('viewer');
 
-// render 2x lebih besar
-const renderWidth = pageWidth * 2;
-const renderHeight = pageHeight * 2;
+  for(let pageNum = 1; pageNum <= pdf.numPages; pageNum++){
+    pdf.getPage(pageNum).then(page => {
 
-const pageFlip = new St.PageFlip(
-  document.getElementById("book"),
-  {
-    width: renderWidth,
-    height: renderHeight,
-    size: "fixed",
-    autoSize: false,
-    showCover: true,
-    maxShadowOpacity: 0.3,
-    drawShadow: true,
-    flippingTime: 800,
-    usePortrait: false,
-    mobileScrollSupport: false
+      const scale = 2; // retina sharp
+      const viewport = page.getViewport({ scale: scale });
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = viewport.width * dpr;
+      canvas.height = viewport.height * dpr;
+      canvas.style.width = viewport.width + "px";
+      canvas.style.height = viewport.height + "px";
+
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport
+      };
+
+      page.render(renderContext);
+      viewer.appendChild(canvas);
+
+    });
   }
-);
-
-pageFlip.loadFromImages([
-  "1.png",
-  "2.png",
-  "3.png",
-  "4.png",
-  "5.png",
-  "6.png",
-  "7.png",
-  "8.png"
-]);
-
-// kecilkan tampilan visual ke ukuran normal
-document.getElementById("book").style.transform = "scale(0.5)";
-document.getElementById("book").style.transformOrigin = "top center";
+});
 </script>
 
 </body>
