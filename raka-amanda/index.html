@@ -104,6 +104,7 @@ h2{
     0 0 1px rgba(255,255,255,0.4);
   border-radius:14px;
   transform-origin: top center;
+  touch-action: none;
 }
 
 canvas{
@@ -138,18 +139,26 @@ const pageHeight = 707;
 
 const bookElement = document.getElementById("book");
 
-const pageFlip = new St.PageFlip(bookElement,{
-  width: pageWidth,
-  height: pageHeight,
-  size: "fixed",
-  autoSize: false,
-  showCover: true,
-  usePortrait: false,
-  maxShadowOpacity: 0.4,
-  flippingTime: 900,
-  mobileScrollSupport: false
-});
+const pageFlip = new St.PageFlip(
+  bookElement,
+  {
+    width: pageWidth,
+    height: pageHeight,
+    size: "fixed",
+    autoSize: false,
+    showCover: true,
+    usePortrait: false,
+    maxShadowOpacity: 0.4,
+    flippingTime: 900,
+    mobileScrollSupport: false,
 
+    // 🔥 Tambahan penting
+    swipeDistance: 120,        // harus geser cukup jauh baru flip
+    clickEventForward: true,   // klik kanan/kiri lebih akurat
+    useMouseEvents: true
+  }
+);
+  
 /* ===== SCALE RESPONSIVE ===== */
 function scaleBook(){
   const screenWidth = window.innerWidth;
@@ -157,6 +166,26 @@ function scaleBook(){
   const scale = Math.min(screenWidth / fullWidth, 1);
   bookElement.style.transform = `scale(${scale})`;
 }
+
+let startX = 0;
+
+bookElement.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+});
+
+bookElement.addEventListener("touchend", (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (Math.abs(diff) > 100) {
+    if (diff < 0) {
+      pageFlip.flipNext();
+    } else {
+      pageFlip.flipPrev();
+    }
+  }
+});
+
 window.addEventListener("resize", scaleBook);
 
 /* ===== AUDIO ===== */
