@@ -36,7 +36,7 @@ img {
 
 <body>
 
-<h2>New Raka & Amanda</h2>
+<h2>Raka & Amanda</h2>
 
 <div id="book"></div>
 
@@ -52,7 +52,10 @@ const pageFlip = new St.PageFlip(
     height: 636,
     size: "fixed",
     showCover: true,
-    maxShadowOpacity: 0.3,
+    maxShadowOpacity: 0.15, // lebih ringan
+    drawShadow: false,      // MATIKAN shadow berat
+    flippingTime: 600,      // animasi lebih cepat & halus
+    usePortrait: true,
     mobileScrollSupport: false
   }
 );
