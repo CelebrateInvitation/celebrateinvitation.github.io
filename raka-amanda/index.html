@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wedding Invitation</title>
+<title>Raka & Amanda Wedding Invitation</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.js"></script>
 
@@ -13,82 +14,128 @@
 body{
   margin:0;
   background:#000;
+  color:#fff;
   display:flex;
   flex-direction:column;
   align-items:center;
   font-family:'Montserrat', sans-serif;
-  overflow:hidden;
+  overflow-x:hidden;
+  position:relative;
 }
 
-/* Lighting */
+/* White luxury glow */
 body::before{
   content:"";
   position:fixed;
   top:50%;
   left:50%;
-  width:1100px;
-  height:1100px;
-  background:radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);
+  width:1200px;
+  height:1200px;
+  background:radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
   transform:translate(-50%,-50%);
   pointer-events:none;
+  z-index:0;
+}
+
+/* Moving light */
+.light-effect{
+  position:fixed;
+  top:0;
+  left:-50%;
+  width:50%;
+  height:100%;
+  background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.05),
+    transparent
+  );
+  transform:skewX(-20deg);
+  animation:lightMove 8s linear infinite;
+  pointer-events:none;
+  z-index:1;
+}
+
+@keyframes lightMove{
+  0%{ left:-50%; }
+  100%{ left:150%; }
+}
+
+.fade-in{
+  opacity:0;
+  transform:translateY(20px);
+  transition:all 1.2s ease;
+}
+.fade-in.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+h2{
+  margin-top:50px;
+  font-weight:300;
+  letter-spacing:6px;
+  font-size:28px;
+  text-transform:uppercase;
+  z-index:2;
+}
+
+#guest-name{
+  margin-top:15px;
+  font-size:14px;
+  letter-spacing:2px;
+  color:#aaa;
+  text-align:center;
+  z-index:2;
+}
+#guest-name strong{
+  display:block;
+  margin-top:8px;
+  font-size:20px;
+  font-weight:600;
+  color:#fff;
 }
 
 #book-wrapper{
   margin-top:60px;
-  perspective:2200px;
-  position:relative;
+  perspective:2000px;
+  z-index:2;
 }
 
-/* BOOK */
 #book{
-  position:relative;
-  border-radius:14px;
-  background:#111;
   box-shadow:
-    0 60px 160px rgba(0,0,0,0.9),
-    0 20px 50px rgba(255,255,255,0.05);
-  transform-style:preserve-3d;
-  touch-action:pan-y; /* 🔥 swipe lebih mudah */
-}
-
-/* 🔥 REALISTIC CENTER SPINE */
-.spine{
-  position:absolute;
-  top:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:14px;
-  height:100%;
-  background:linear-gradient(
-    to right,
-    rgba(0,0,0,0.8),
-    rgba(0,0,0,0.4),
-    rgba(0,0,0,0.8)
-  );
-  z-index:5;
-  pointer-events:none;
-  transition:opacity 0.2s ease;
-}
-
-/* Saat swipe berlangsung spine hilang */
-.spine.hide{
-  opacity:0;
+    0 40px 120px rgba(255,255,255,0.05),
+    0 0 40px rgba(255,255,255,0.08),
+    0 0 1px rgba(255,255,255,0.4);
+  border-radius:14px;
+  transform-origin: top center;
+  touch-action: none;
 }
 
 canvas{
   border-radius:6px;
-  backface-visibility:hidden;
-  transform:translateZ(0);
 }
 </style>
 </head>
 
 <body>
 
-<div id="book-wrapper">
+<div class="light-effect"></div>
+
+<h2 class="fade-in" id="title">Raka & Amanda</h2>
+<div id="guest-name" class="fade-in"></div>
+
+<div id="book-wrapper" class="fade-in">
   <div id="book"></div>
-  <div class="spine" id="spine"></div>
 </div>
+
+<audio id="bg-music" loop playsinline>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="flipSound" preload="auto">
+  <source src="paper-flip.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 const pdfUrl = "magazinevol1.pdf";
@@ -97,92 +144,151 @@ const pageHeight = 707;
 const isMobile = window.innerWidth < 768;
 
 const bookElement = document.getElementById("book");
-const spine = document.getElementById("spine");
 
-/* ==============================
-   PAGE FLIP CONFIG (HP SMOOTH)
-============================== */
+/* ===== PAGEFLIP SETUP ===== */
 const pageFlip = new St.PageFlip(bookElement, {
   width: pageWidth,
   height: pageHeight,
   size: "fixed",
   autoSize: false,
   showCover: true,
-  usePortrait: false,     // tetap 2 halaman
-
-  flippingTime: 700,
-  maxShadowOpacity: 0.45,
-  drawShadow: true,
-
-  useMouseEvents: true,
+  usePortrait: false,
+  maxShadowOpacity: 0.4,
+  flippingTime: 900,
   mobileScrollSupport: false,
-  swipeDistance: 5,       // 🔥 lebih sensitif
-  clickEventForward: true
+
+  // 🔥 penting
+  useMouseEvents: !isMobile,
+  swipeDistance: 9999
 });
 
-/* ==============================
-   RESPONSIVE SCALE
-============================== */
+/* ===== SCALE RESPONSIVE ===== */
 function scaleBook(){
   const screenWidth = window.innerWidth;
-  const scale = Math.min(screenWidth / (pageWidth * 2), 1);
+  const fullWidth = pageWidth * 2;
+  const scale = Math.min(screenWidth / fullWidth, 1);
   bookElement.style.transform = `scale(${scale})`;
 }
+
 window.addEventListener("resize", scaleBook);
 
-/* ==============================
-   REALISTIC SPINE BEHAVIOR
-============================== */
+/* ===== CUSTOM SWIPE MOBILE ===== */
+if(isMobile){
 
-/* Saat mulai swipe */
-pageFlip.on("folding", () => {
-  spine.classList.add("hide");
+  let startX = 0;
+  let startY = 0;
+  let isValidSwipe = false;
+
+  bookElement.addEventListener("touchstart", (e)=>{
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isValidSwipe = true;
+  });
+
+  bookElement.addEventListener("touchmove", (e)=>{
+    const moveX = e.touches[0].clientX;
+    const moveY = e.touches[0].clientY;
+
+    const diffX = moveX - startX;
+    const diffY = moveY - startY;
+
+    if(Math.abs(diffY) > Math.abs(diffX)){
+      isValidSwipe = false;
+    }
+  });
+
+  bookElement.addEventListener("touchend", (e)=>{
+    if(!isValidSwipe) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+
+    if(Math.abs(diff) > 120){
+      if(diff < 0){
+        pageFlip.flipNext();
+      } else {
+        pageFlip.flipPrev();
+      }
+    }
+  });
+}
+
+/* ===== AUDIO ===== */
+const flipSound = document.getElementById("flipSound");
+const bgMusic = document.getElementById("bg-music");
+
+document.addEventListener("click", function unlock(){
+  bgMusic.volume = 0.6;
+  bgMusic.play().catch(()=>{});
+  document.removeEventListener("click", unlock);
 });
 
-/* Saat flip selesai */
-pageFlip.on("flip", () => {
-  spine.classList.remove("hide");
+let isFirstFlip = true;
+
+pageFlip.on("flip", function(e){
+  if(isFirstFlip){
+    isFirstFlip = false;
+    return;
+  }
+  flipSound.currentTime = 0;
+  flipSound.play().catch(()=>{});
 });
 
-/* Kalau cancel swipe */
-pageFlip.on("changeOrientation", () => {
-  spine.classList.remove("hide");
-});
-
-/* ==============================
-   PDF RENDER
-============================== */
+/* ===== PDF RENDER ===== */
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-(async()=>{
-  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const renderScale = isMobile ? 1.2 : 1.5;
+
   const pages = [];
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
-  const renderScale = isMobile ? 1.1 : 1.4;
-
   for(let i=1;i<=pdf.numPages;i++){
+
     const page = await pdf.getPage(i);
     const viewport = page.getViewport({ scale: renderScale });
 
     const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
     canvas.width = viewport.width * dpr;
     canvas.height = viewport.height * dpr;
+
     canvas.style.width = pageWidth + "px";
     canvas.style.height = pageHeight + "px";
 
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    context.setTransform(dpr,0,0,dpr,0,0);
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
 
     pages.push(canvas);
   }
 
   pageFlip.loadFromHTML(pages);
   scaleBook();
-})();
+  document.getElementById("book-wrapper").classList.add("show");
+});
+
+/* ===== GUEST SYSTEM ===== */
+const params = new URLSearchParams(window.location.search);
+let guest = params.get("to") || "Tamu Undangan";
+guest = decodeURIComponent(guest.replace(/\+/g," "));
+
+document.getElementById("guest-name").innerHTML =
+`PREPARED EXCLUSIVELY FOR<br><strong>${guest}</strong>`;
+
+/* ===== FADE IN ===== */
+window.addEventListener("load",()=>{
+  setTimeout(()=>document.getElementById("title").classList.add("show"),300);
+  setTimeout(()=>document.getElementById("guest-name").classList.add("show"),700);
+});
 </script>
 
 </body>
