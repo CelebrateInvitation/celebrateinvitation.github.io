@@ -40,16 +40,11 @@ body {
    DEVICE PIXEL RATIO FIX
 ================================ */
 
-const dpr = window.devicePixelRatio || 1;
-
-const pageWidth = 500;
-const pageHeight = 707;
-
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: pageWidth,
-    height: pageHeight,
+    width: 700,
+    height: 990,
     size: "fixed",
     autoSize: false,
     showCover: true,
@@ -57,7 +52,7 @@ const pageFlip = new St.PageFlip(
     drawShadow: true,
     flippingTime: 800,
     usePortrait: false,
-    mobileScrollSupport: false,
+    mobileScrollSupport: false
   }
 );
 
