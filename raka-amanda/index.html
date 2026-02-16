@@ -183,6 +183,7 @@ function scaleBook() {
   const fullWidth = pageWidth * 2;
   bookElement.style.transformOrigin = "top center";
   
+  const scale = Math.min(screenWidth / fullWidth, 1);
   bookElement.style.transform = `scale(${scale})`;
 }
 
