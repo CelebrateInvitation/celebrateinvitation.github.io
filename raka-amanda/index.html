@@ -36,6 +36,13 @@ h2{
 <body>
 
 <h2>Raka & Amanda</h2>
+<div id="guest-name" style="
+  margin-top:10px;
+  font-size:18px;
+  text-align:center;
+  color:#333;
+">
+</div>
 <div id="book"></div>
 
 <audio autoplay loop>
@@ -103,6 +110,24 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
   });
 
 });
+
+const params = new URLSearchParams(window.location.search);
+let guest = params.get("to");
+
+// Jika tidak ada nama
+if (!guest) {
+  guest = "Tamu Undangan";
+}
+
+// Decode spasi +
+guest = decodeURIComponent(guest.replace(/\+/g, " "));
+
+// Tampilkan di halaman
+document.getElementById("guest-name").innerHTML = `
+  Prepared Exclusively for<br>
+  <strong>${guest}</strong>
+`;
+  
 </script>
 
 </body>
