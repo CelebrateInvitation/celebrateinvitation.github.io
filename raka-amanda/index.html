@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Raka & Amanda Wedding Invitation</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -20,6 +19,18 @@ body{
   font-family:'Montserrat', sans-serif;
 }
 
+/* ===== ANIMATION ===== */
+.fade-in{
+  opacity:0;
+  transform:translateY(20px);
+  transition:all 1s ease;
+}
+
+.fade-in.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
 /* HEADER */
 h2{
   margin-top:40px;
@@ -30,7 +41,7 @@ h2{
   color:#222;
 }
 
-/* GUEST NAME */
+/* GUEST */
 #guest-name{
   margin-top:10px;
   font-size:16px;
@@ -47,26 +58,22 @@ h2{
   color:#000;
 }
 
-/* BOOK STYLE */
+/* BOOK */
 #book{
   margin-top:40px;
   box-shadow:0 40px 80px rgba(0,0,0,0.25);
   border-radius:12px;
-}
-
-.page{
-  background:white;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Raka & Amanda</h2>
+<h2 class="fade-in" id="title">Raka & Amanda</h2>
 
-<div id="guest-name"></div>
+<div id="guest-name" class="fade-in"></div>
 
-<div id="book"></div>
+<div id="book" class="fade-in"></div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
@@ -93,6 +100,7 @@ const pageFlip = new St.PageFlip(
   }
 );
 
+/* ===== LOAD PDF ===== */
 pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
   const pages = [];
@@ -128,12 +136,14 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
   Promise.all(pages).then(resolvedPages => {
     pageFlip.loadFromHTML(resolvedPages);
+
+    // Fade in setelah PDF selesai render
+    document.getElementById("book").classList.add("show");
   });
 
 });
 
 /* ===== GUEST NAME SYSTEM ===== */
-
 const params = new URLSearchParams(window.location.search);
 let guest = params.get("to");
 
@@ -147,6 +157,17 @@ document.getElementById("guest-name").innerHTML = `
   Prepared Exclusively for
   <strong>${guest}</strong>
 `;
+
+/* ===== FADE IN HEADER & GUEST ===== */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("title").classList.add("show");
+  }, 200);
+
+  setTimeout(() => {
+    document.getElementById("guest-name").classList.add("show");
+  }, 500);
+});
 </script>
 
 </body>
