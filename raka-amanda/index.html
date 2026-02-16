@@ -25,6 +25,8 @@ h2{
   margin-top:40px;
   box-shadow:0 40px 80px rgba(0,0,0,0.3);
   border-radius:12px;
+  position:relative;
+  left:-250px; /* geser setengah lebar halaman */
 }
 
 .page{
@@ -106,6 +108,13 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
   Promise.all(pages).then(resolvedPages => {
     pageFlip.loadFromHTML(resolvedPages);
+    pageFlip.on("flip", (e) => {
+      if (e.data === 0) {
+        document.getElementById("book").style.left = "-250px";
+      } else {
+        document.getElementById("book").style.left = "0px";
+      }
+    });
     pageFlip.flipNext(); // 🔥 langsung buka cover
   });
 
