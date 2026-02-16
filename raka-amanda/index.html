@@ -21,12 +21,17 @@ h2{
   margin-top:30px;
 }
 
-#book{
+#book-wrapper{
+  width:500px;              /* lebar 1 halaman */
+  height:707px;
+  overflow:hidden;          /* penting */
   margin-top:40px;
+  position:relative;
+}
+
+#book{
   box-shadow:0 40px 80px rgba(0,0,0,0.3);
   border-radius:12px;
-  position:relative;
-  left:-250px; /* geser setengah lebar halaman */
 }
 
 .page{
@@ -38,7 +43,9 @@ h2{
 <body>
 
 <h2>Raka & Amanda</h2>
-<div id="book"></div>
+<div id="book-wrapper">
+  <div id="book"></div>
+</div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
@@ -108,13 +115,16 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
   Promise.all(pages).then(resolvedPages => {
     pageFlip.loadFromHTML(resolvedPages);
+
     pageFlip.on("flip", (e) => {
+      const wrapper = document.getElementById("book-wrapper");
+
       if (e.data === 0) {
-        document.getElementById("book").style.left = "-250px";
+        wrapper.style.width = "500px";     // cover 1 halaman
       } else {
-        document.getElementById("book").style.left = "0px";
+        wrapper.style.width = "1000px";    // 2 halaman
       }
-    })
+    });
   });
 
 });
