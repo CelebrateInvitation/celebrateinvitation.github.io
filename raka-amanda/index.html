@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Andi & Rina Wedding Invitation</title>
+<title>Raka & Amanda Wedding Invitation</title>
 
 <script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.js"></script>
 
@@ -30,6 +30,7 @@ img {
   width:100%;
   height:100%;
   object-fit:cover;
+  image-rendering: auto;
 }
 </style>
 </head>
@@ -48,9 +49,9 @@ img {
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 450,
-    height: 600,
-    size: "stretch",
+    width: 600,
+    height: 800,
+    size: "fixed",
     showCover: true,
     maxShadowOpacity: 0.6,
     mobileScrollSupport: false
