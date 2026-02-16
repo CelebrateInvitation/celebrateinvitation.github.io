@@ -16,20 +16,18 @@ body {
   font-family:Arial;
 }
 
-#book {
+/* WRAPPER untuk retina scale */
+#wrapper {
   margin-top:40px;
+  transform: scale(0.5);              /* ukuran visual */
+  transform-origin: top center;
+  width: 1000px;                      /* HARUS sama dengan renderWidth */
+}
+
+/* container flipbook */
+#book {
   box-shadow: 0 40px 80px rgba(0,0,0,0.3);
   border-radius: 12px;
-}
-
-.page {
-  background:white;
-}
-
-img {
-  width:100%;
-  height:auto;
-  display:block;
 }
 
 canvas {
@@ -40,23 +38,27 @@ canvas {
 
 <body>
 
-<h2>Fix Raka & Amanda</h2>
+<h2>Raka & Amanda</h2>
 
-<div id="book"></div>
+<div id="wrapper">
+  <div id="book"></div>
+</div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-const scale = window.devicePixelRatio || 1;
+/* ================================
+   RETINA RENDER FIX
+================================ */
 
 const pageWidth = 500;
 const pageHeight = 707;
 
-// render 2x lebih besar
-const renderWidth = pageWidth * 2;
-const renderHeight = pageHeight * 2;
+/* render 2x lebih besar supaya tajam */
+const renderWidth = pageWidth * 2;    // 1000
+const renderHeight = pageHeight * 2;  // 1414
 
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
@@ -69,7 +71,7 @@ const pageFlip = new St.PageFlip(
     maxShadowOpacity: 0.3,
     drawShadow: true,
     flippingTime: 800,
-    usePortrait: false,
+    usePortrait: false,   // 2 halaman
     mobileScrollSupport: false
   }
 );
@@ -84,10 +86,6 @@ pageFlip.loadFromImages([
   "7.png",
   "8.png"
 ]);
-
-// kecilkan tampilan visual ke ukuran normal
-document.getElementById("book").style.transform = "scale(0.5)";
-document.getElementById("book").style.transformOrigin = "top center";
 </script>
 
 </body>
