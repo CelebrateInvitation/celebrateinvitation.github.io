@@ -141,39 +141,77 @@ canvas{
 const pdfUrl = "magazinevol1.pdf";
 const pageWidth = 500;
 const pageHeight = 707;
+const isMobile = window.innerWidth < 768;
 
 const bookElement = document.getElementById("book");
 
-/* ===== PAGEFLIP CONFIG ===== */
+/* ===== PAGEFLIP SETUP ===== */
 const pageFlip = new St.PageFlip(bookElement, {
   width: pageWidth,
   height: pageHeight,
   size: "fixed",
   autoSize: false,
   showCover: true,
-
-  usePortrait: false,          // 🔥 WAJIB false supaya 2 halaman
+  usePortrait: false,
+  maxShadowOpacity: 0.4,
+  flippingTime: 900,
   mobileScrollSupport: false,
-  useMouseEvents: true,
 
-  swipeDistance: 20,           // kecil supaya responsif
-  flippingTime: 700,
-  maxShadowOpacity: 0.4
+  // 🔥 penting
+  useMouseEvents: !isMobile,
+  swipeDistance: 9999
 });
 
-/* ===== RESPONSIVE SCALE (TANPA MERUSAK GESTURE) ===== */
+/* ===== SCALE RESPONSIVE ===== */
 function scaleBook(){
   const screenWidth = window.innerWidth;
   const fullWidth = pageWidth * 2;
-
   const scale = Math.min(screenWidth / fullWidth, 1);
-
-  bookElement.style.transformOrigin = "top center";
   bookElement.style.transform = `scale(${scale})`;
 }
 
 window.addEventListener("resize", scaleBook);
-window.addEventListener("load", scaleBook);
+
+/* ===== CUSTOM SWIPE MOBILE ===== */
+if(isMobile){
+
+  let startX = 0;
+  let startY = 0;
+  let isValidSwipe = false;
+
+  bookElement.addEventListener("touchstart", (e)=>{
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isValidSwipe = true;
+  });
+
+  bookElement.addEventListener("touchmove", (e)=>{
+    const moveX = e.touches[0].clientX;
+    const moveY = e.touches[0].clientY;
+
+    const diffX = moveX - startX;
+    const diffY = moveY - startY;
+
+    if(Math.abs(diffY) > Math.abs(diffX)){
+      isValidSwipe = false;
+    }
+  });
+
+  bookElement.addEventListener("touchend", (e)=>{
+    if(!isValidSwipe) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+
+    if(Math.abs(diff) > 120){
+      if(diff < 0){
+        pageFlip.flipNext();
+      } else {
+        pageFlip.flipPrev();
+      }
+    }
+  });
+}
 
 /* ===== AUDIO ===== */
 const flipSound = document.getElementById("flipSound");
@@ -187,24 +225,23 @@ document.addEventListener("click", function unlock(){
 
 let isFirstFlip = true;
 
-pageFlip.on("flip", function(){
+pageFlip.on("flip", function(e){
   if(isFirstFlip){
     isFirstFlip = false;
     return;
   }
-
   flipSound.currentTime = 0;
   flipSound.play().catch(()=>{});
 });
 
-/* ===== PDF RENDER OPTIMIZED ===== */
+/* ===== PDF RENDER ===== */
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 pdfjsLib.getDocument(pdfUrl).promise.then(async pdf=>{
 
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const renderScale = window.innerWidth < 768 ? 1.2 : 1.5;
+  const renderScale = isMobile ? 1.2 : 1.5;
 
   const pages = [];
 
