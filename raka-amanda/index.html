@@ -21,15 +21,8 @@ h2{
   margin-top:30px;
 }
 
-#book-wrapper{
-  width:500px;              /* lebar 1 halaman */
-  height:707px;
-  overflow:hidden;          /* penting */
-  margin-top:40px;
-  position:relative;
-}
-
 #book{
+  margin-top:40px;
   box-shadow:0 40px 80px rgba(0,0,0,0.3);
   border-radius:12px;
 }
@@ -43,9 +36,7 @@ h2{
 <body>
 
 <h2>Raka & Amanda</h2>
-<div id="book-wrapper">
-  <div id="book"></div>
-</div>
+<div id="book"></div>
 
 <audio autoplay loop>
   <source src="music.mp3" type="audio/mpeg">
@@ -64,10 +55,9 @@ const pageFlip = new St.PageFlip(
     height: pageHeight,
     size: "fixed",
     autoSize: false,
-    showCover: false,     // ❌ jangan pakai showCover
-    usePortrait: false,   // selalu 2 halaman
-    maxShadowOpacity: 0.5,
-    drawShadow: true,
+    showCover: true,
+    usePortrait: false,
+    maxShadowOpacity: 0.3,
     flippingTime: 800,
     mobileScrollSupport: false
   }
@@ -77,20 +67,13 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
   const pages = [];
 
-  // 🔥 Tambahkan dummy kosong di awal
-  const dummy = document.createElement("div");
-  dummy.style.background = "transparent";
-  dummy.style.width = pageWidth + "px";
-  dummy.style.height = pageHeight + "px";
-  pages.push(Promise.resolve(dummy));
-
   for (let num = 1; num <= pdf.numPages; num++) {
 
     pages.push(
       pdf.getPage(num).then(page => {
 
-        const scale = 2;
-        const viewport = page.getViewport({ scale });
+        const scale = 2; // retina sharp
+        const viewport = page.getViewport({ scale: scale });
 
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -105,26 +88,18 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        return page.render({
+        page.render({
           canvasContext: context,
           viewport: viewport
-        }).promise.then(() => canvas);
+        });
+
+        return canvas;
       })
     );
   }
 
   Promise.all(pages).then(resolvedPages => {
     pageFlip.loadFromHTML(resolvedPages);
-
-    pageFlip.on("flip", (e) => {
-      const wrapper = document.getElementById("book-wrapper");
-
-      if (e.data === 0) {
-        wrapper.style.width = "500px";     // cover 1 halaman
-      } else {
-        wrapper.style.width = "1000px";    // 2 halaman
-      }
-    });
   });
 
 });
