@@ -51,13 +51,15 @@ const pageHeight = 707;
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: pageWidth,
-    height: pageHeight,
+    width: 500,
+    height: 707,
     size: "fixed",
-    autoSize: false,
-    showCover: true,
-    usePortrait: false,
-    maxShadowOpacity: 0.3,
+    autoSize: true,
+    showCover: true,     // penting
+    usePortrait: false,  // 2 halaman
+    startPage: 0,
+    maxShadowOpacity: 0.5,
+    drawShadow: true,
     flippingTime: 800,
     mobileScrollSupport: false
   }
