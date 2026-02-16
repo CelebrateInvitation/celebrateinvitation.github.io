@@ -48,16 +48,17 @@ const pdfUrl = "magazinevol1.pdf";
 const pageWidth = 500;
 const pageHeight = 707;
 
+let isFirstPage = true;
+
 const pageFlip = new St.PageFlip(
   document.getElementById("book"),
   {
-    width: 500,
-    height: 707,
+    width: pageWidth,
+    height: pageHeight,
     size: "fixed",
-    autoSize: true,
-    showCover: true,     // penting
-    usePortrait: false,  // 2 halaman
-    startPage: 0,
+    autoSize: false,
+    showCover: true,
+    usePortrait: true,   // 👈 START 1 HALAMAN DULU
     maxShadowOpacity: 0.5,
     drawShadow: true,
     flippingTime: 800,
@@ -74,8 +75,8 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
     pages.push(
       pdf.getPage(num).then(page => {
 
-        const scale = 2; // retina sharp
-        const viewport = page.getViewport({ scale: scale });
+        const scale = 2; // tajam
+        const viewport = page.getViewport({ scale });
 
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -90,18 +91,27 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        page.render({
+        return page.render({
           canvasContext: context,
           viewport: viewport
-        });
-
-        return canvas;
+        }).promise.then(() => canvas);
       })
     );
   }
 
   Promise.all(pages).then(resolvedPages => {
     pageFlip.loadFromHTML(resolvedPages);
+
+    // 👇 Setelah cover dibalik, ubah jadi 2 halaman
+    pageFlip.on("flip", (e) => {
+      if (isFirstPage && e.data > 0) {
+        pageFlip.update({
+          usePortrait: false   // jadi 2 halaman
+        });
+        isFirstPage = false;
+      }
+    });
+
   });
 
 });
